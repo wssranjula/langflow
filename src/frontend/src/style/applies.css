@@ -126,6 +126,18 @@
     @apply form-input block w-full truncate rounded-md border-border bg-background px-3 text-left shadow-sm placeholder:text-muted-foreground focus:border-ring focus:placeholder-transparent focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm;
   }
 
+  .skeleton-card {
+    @apply bg-background h-48 p-4 border rounded-lg flex flex-col gap-6;
+  }
+
+  .skeleton-card-wrapper {
+    @apply flex items-center space-x-4;
+  }
+
+  .skeleton-card-text {
+    @apply flex flex-col gap-3;
+  }
+
   /* The same as primary-input but no-truncate */
   .textarea-primary {
     @apply form-input block w-full rounded-md border-border bg-background px-3 text-left shadow-sm placeholder:text-muted-foreground focus:border-ring focus:placeholder-transparent focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm;
@@ -190,6 +202,10 @@
 
   .flex-max-width {
     @apply flex w-full;
+  }
+
+  .loading-page-panel {
+    @apply h-full w-full flex justify-center items-center bg-muted;
   }
 
   .main-page-panel {
@@ -484,16 +500,22 @@
     @apply flex-max-width h-12 items-center justify-between border-border bg-muted;
   }
   .header-start-display {
-    @apply flex w-96 items-center justify-start gap-2;
+    @apply flex w-[30%] items-center justify-start gap-2;
   }
   .header-end-division {
-    @apply flex w-96 justify-end px-2;
+    @apply flex w-[30%] justify-end px-2;
   }
   .header-end-display {
     @apply ml-auto mr-2 flex items-center gap-5;
   }
   .header-github-link-box {
     @apply inline-flex h-9 items-center justify-center rounded-md border border-input px-3 pr-0 shadow-sm;
+  }
+  .header-waitlist-link-box {
+    @apply inline-flex h-9 items-center justify-center rounded-md border border-input px-2 shadow-sm text-sm  font-medium text-muted-foreground ring-offset-background disabled:pointer-events-none disabled:opacity-50 whitespace-nowrap;
+  }
+  .header-waitlist-link-box:hover {
+    @apply hover:bg-accent hover:text-accent-foreground;
   }
   .header-github-link {
     @apply header-github-link-box text-sm  font-medium text-muted-foreground ring-offset-background disabled:pointer-events-none disabled:opacity-50;
@@ -1018,5 +1040,13 @@
 
   .chat-message-highlight {
     @apply rounded-md bg-indigo-100 px-0.5 dark:bg-indigo-900;
+  }
+
+  .field-invalid{
+    @apply font-medium text-[0.8rem] text-destructive absolute
+  }
+
+  .label-invalid{
+    @apply text-destructive
   }
 }

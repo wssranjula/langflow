@@ -1,6 +1,7 @@
 import ast
 import contextlib
-from typing import Any
+from typing import Any, List
+from langflow.api.utils import merge_nested_dicts_with_renaming
 from langflow.interface.agents.base import agent_creator
 from langflow.interface.chains.base import chain_creator
 from langflow.interface.custom.constants import CUSTOM_COMPONENT_SUPPORTED_TYPES
@@ -30,7 +31,6 @@ from langflow.interface.retrievers.base import retriever_creator
 from langflow.interface.custom.directory_reader import DirectoryReader
 from langflow.utils.logger import logger
 from langflow.utils.util import get_base_classes
-from langflow.api.utils import merge_nested_dicts
 
 import re
 import warnings
@@ -190,14 +190,16 @@ def build_frontend_node(custom_component: CustomComponent):
 
 def update_attributes(frontend_node, template_config):
     """Update the display name and description of a frontend node"""
-    if "display_name" in template_config:
-        frontend_node["display_name"] = template_config["display_name"]
-
-    if "description" in template_config:
-        frontend_node["description"] = template_config["description"]
-
-    if "beta" in template_config:
-        frontend_node["beta"] = template_config["beta"]
+    attributes = [
+        "display_name",
+        "description",
+        "beta",
+        "documentation",
+        "output_types",
+    ]
+    for attribute in attributes:
+        if attribute in template_config:
+            frontend_node[attribute] = template_config[attribute]
 
 
 def build_field_config(custom_component: CustomComponent):
@@ -257,26 +259,27 @@ def get_field_properties(extra_field):
     return field_name, field_type, field_value, field_required
 
 
-def add_base_classes(frontend_node, return_type):
+def add_base_classes(frontend_node, return_types: List[str]):
     """Add base classes to the frontend node"""
-    if return_type not in CUSTOM_COMPONENT_SUPPORTED_TYPES or return_type is None:
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "error": (
-                    "Invalid return type should be one of: "
-                    f"{list(CUSTOM_COMPONENT_SUPPORTED_TYPES.keys())}"
-                ),
-                "traceback": traceback.format_exc(),
-            },
-        )
+    for return_type in return_types:
+        if return_type not in CUSTOM_COMPONENT_SUPPORTED_TYPES or return_type is None:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": (
+                        "Invalid return type should be one of: "
+                        f"{list(CUSTOM_COMPONENT_SUPPORTED_TYPES.keys())}"
+                    ),
+                    "traceback": traceback.format_exc(),
+                },
+            )
 
-    return_type_instance = CUSTOM_COMPONENT_SUPPORTED_TYPES.get(return_type)
-    base_classes = get_base_classes(return_type_instance)
+        return_type_instance = CUSTOM_COMPONENT_SUPPORTED_TYPES.get(return_type)
+        base_classes = get_base_classes(return_type_instance)
 
-    for base_class in base_classes:
-        if base_class not in CLASSES_TO_REMOVE:
-            frontend_node.get("base_classes").append(base_class)
+        for base_class in base_classes:
+            if base_class not in CLASSES_TO_REMOVE:
+                frontend_node.get("base_classes").append(base_class)
 
 
 def build_langchain_template_custom_component(custom_component: CustomComponent):
@@ -334,7 +337,9 @@ def build_valid_menu(valid_components):
         valid_menu[menu_name] = {}
 
         for component in menu_item["components"]:
-            logger.debug(f"Building component: {component}")
+            logger.debug(
+                f"Building component: {component.get('name'), component.get('output_types')}"
+            )
             try:
                 component_name = component["name"]
                 component_code = component["code"]
@@ -423,4 +428,4 @@ def build_langchain_custom_component_list_from_path(path: str):
     valid_menu = build_valid_menu(valid_components)
     invalid_menu = build_invalid_menu(invalid_components)
 
-    return merge_nested_dicts(valid_menu, invalid_menu)
+    return merge_nested_dicts_with_renaming(valid_menu, invalid_menu)
